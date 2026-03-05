@@ -1,6 +1,8 @@
 source "https://gem.coop"
 
-gem "libusb"
+gemspec
+
+# Used by applications/ambilight, not by the gem runtime itself.
 gem "ruby-vips"
 
 group :development do
@@ -16,4 +18,10 @@ group :development do
   gem "rubocop-rails", require: false
   gem "rubocop-rails-omakase", require: false
   gem "rubocop-rspec", require: false
+end
+
+group :test do
+  gem "minitest"
+  gem "minitest-reporters"
+  gem "rake"
 end

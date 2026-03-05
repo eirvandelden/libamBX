@@ -1,1 +1,1 @@
-AGENTS.md
+/Users/etienne.vandelden/Developer/dotfiles/CLAUDE.md
