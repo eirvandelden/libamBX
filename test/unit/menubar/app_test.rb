@@ -1,46 +1,44 @@
 require_relative "../../test_helper"
 require_relative "../../../applications/menubar/app"
 
-module MenubarTestLights
-  LEFT = 0x0B
-  WWLEFT = 0x2B
-  WWCENTER = 0x3B
-  WWRIGHT = 0x4B
-  RIGHT = 0x1B
-end
-
-module MenubarTestFans
-  LEFT = 0x5B
-  RIGHT = 0x6B
-end
-
 MENUBAR_TEST_COLORS = [ { "name" => "Warm White", "rgb" => [ 255, 200, 150 ] } ].freeze
 MENUBAR_TEST_FAN_SPEEDS = [ { "name" => "Fan: Medium", "speed" => 170 } ].freeze
 
-class MenubarDeviceSpy
-  attr_reader :writes, :close_count, :connect_count, :open_count
+class MenubarLightSpy
+  attr_reader :calls
 
-  def initialize(connect: true, open: true)
-    @connect = connect
-    @open = open
-    @writes = []
+  def initialize
+    @calls = []
+  end
+
+  def off
+    @calls << [ :off ]
+  end
+
+  def set_all(color)
+    @calls << [ :set_all, color.to_a ]
+  end
+end
+
+class MenubarFanSpy
+  attr_reader :calls
+
+  def initialize
+    @calls = []
+  end
+
+  def set_all(speed)
+    @calls << [ :set_all, speed ]
+  end
+end
+
+class MenubarSessionSpy
+  attr_reader :lights, :fans, :close_count
+
+  def initialize
+    @lights = MenubarLightSpy.new
+    @fans = MenubarFanSpy.new
     @close_count = 0
-    @connect_count = 0
-    @open_count = 0
-  end
-
-  def connect
-    @connect_count += 1
-    @connect
-  end
-
-  def open
-    @open_count += 1
-    @open
-  end
-
-  def write(bytes)
-    @writes << bytes
   end
 
   def close
@@ -48,54 +46,53 @@ class MenubarDeviceSpy
   end
 end
 
-def build_menubar_app(device)
+def build_menubar_app(session)
   Menubar::App.new(
-    device: device,
-    lights: MenubarTestLights,
-    fans: MenubarTestFans,
+    session_factory: -> { session },
     colors: MENUBAR_TEST_COLORS,
-    fan_speeds: MENUBAR_TEST_FAN_SPEEDS,
-    green_boost: 1.0
+    fan_speeds: MENUBAR_TEST_FAN_SPEEDS
   )
 end
 
 describe Menubar::App, "#connection_available?" do
-  it "closes the interface after probing connection status" do
-    device = MenubarDeviceSpy.new
-    app = build_menubar_app(device)
+  it "opens and closes a session while probing connection status" do
+    session = MenubarSessionSpy.new
+    app = build_menubar_app(session)
 
     _(app.connection_available?).must_equal true
-    _(device.connect_count).must_equal 1
-    _(device.open_count).must_equal 1
-    _(device.close_count).must_equal 1
+    _(session.close_count).must_equal 1
   end
 end
 
-describe Menubar::App, "#handle_selection for colors" do
-  it "writes all light zones for a color selection and closes once" do
-    device = MenubarDeviceSpy.new
-    app = build_menubar_app(device)
+describe Menubar::App, "#handle_selection" do
+  it "turns all lights off" do
+    session = MenubarSessionSpy.new
+    app = build_menubar_app(session)
+
+    connected = app.handle_selection(Menubar::STRINGS[:turn_off], connected: false)
+
+    _(connected).must_equal true
+    _(session.lights.calls).must_equal [ [ :off ] ]
+    _(session.close_count).must_equal 1
+  end
+
+  it "sends a color selection through the session light bank" do
+    session = MenubarSessionSpy.new
+    app = build_menubar_app(session)
 
     connected = app.handle_selection("Warm White", connected: false)
 
     _(connected).must_equal true
-    _(device.writes.length).must_equal 5
-    _(device.close_count).must_equal 1
+    _(session.lights.calls).must_equal [ [ :set_all, [ 255, 200, 150 ] ] ]
   end
-end
 
-describe Menubar::App, "#handle_selection for fans" do
-  it "writes both fan channels for a fan selection" do
-    device = MenubarDeviceSpy.new
-    app = build_menubar_app(device)
+  it "sends a fan selection through the session fan bank" do
+    session = MenubarSessionSpy.new
+    app = build_menubar_app(session)
 
     connected = app.handle_selection("Fan: Medium", connected: false)
 
     _(connected).must_equal true
-    _(device.writes).must_equal [
-      [ 0xA1, MenubarTestFans::LEFT, 0x03, 0, 0, 170 ],
-      [ 0xA1, MenubarTestFans::RIGHT, 0x03, 0, 0, 170 ]
-    ]
-    _(device.close_count).must_equal 1
+    _(session.fans.calls).must_equal [ [ :set_all, 170 ] ]
   end
 end
