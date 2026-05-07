@@ -1,18 +1,25 @@
 module Menubar
+  STRINGS = {
+    title: "Ambx Lights",
+    connected: "✓ Connected",
+    disconnected: "⚠️ Disconnected",
+    turn_off: "Turn Off Lights",
+    quit: "QUIT"
+  }.freeze
+
   class App
-    def initialize(device:, lights:, fans:, colors:, fan_speeds:, green_boost:, input: $stdin, output: $stdout)
-      @device = device
-      @lights = lights
-      @fans = fans
+    def initialize(session_factory:, colors:, fan_speeds:, input: $stdin, output: $stdout, listener_factory: nil)
+      @session_factory = session_factory
       @colors = colors
       @fan_speeds = fan_speeds
-      @green_boost = green_boost
       @input = input
       @output = output
+      @listener_factory = listener_factory
     end
 
     def run
       connected = connection_available?
+      listener = start_listener
       print_menu(connected)
 
       while (selection = @input.gets&.chomp)
@@ -22,21 +29,23 @@ module Menubar
         connected = outcome
         print_menu(connected)
       end
+    ensure
+      listener&.stop
     end
 
     def connection_available?
-      with_connection { nil }
+      with_session { true }
     end
 
     def handle_selection(selection, connected:)
-      return :quit if selection == "QUIT"
-      return perform { set_all_lights(0, 0, 0) } if selection == "Turn Off Lights"
+      return :quit if selection == STRINGS[:quit]
+      return perform { |session| session.lights.off } if selection == STRINGS[:turn_off]
 
       fan = @fan_speeds.find { |entry| entry["name"] == selection }
-      return perform { set_fan_speed(fan["speed"]) } if fan
+      return perform { |session| session.fans.set_all(fan["speed"]) } if fan
 
       color = @colors.find { |entry| entry["name"] == selection }
-      return perform { set_all_lights(*color["rgb"]) } if color
+      return perform { |session| session.lights.set_all(Ambx::Color.rgb(*color["rgb"])) } if color
 
       connected
     end
@@ -44,41 +53,36 @@ module Menubar
     private
 
     def perform
-      with_connection { yield }
+      with_session do |session|
+        yield(session)
+        true
+      end
     end
 
-    def with_connection
-      opened = @device.connect && @device.open
-      return false unless opened
-
-      yield
-      true
+    def with_session
+      session = @session_factory.call
+      yield(session)
+    rescue Ambx::Error::Base
+      false
     ensure
-      @device.close if opened
+      session&.close
     end
 
-    def set_all_lights(r, g, b)
-      boosted_green = [ g * @green_boost, 255 ].min.round
+    def start_listener
+      return unless @listener_factory
 
-      [ @lights::LEFT, @lights::WWLEFT, @lights::WWCENTER, @lights::WWRIGHT, @lights::RIGHT ].each do |light_id|
-        @device.write([ 0xA1, light_id, 0x03, r, boosted_green, b ])
-      end
-    end
-
-    def set_fan_speed(speed)
-      [ @fans::LEFT, @fans::RIGHT ].each do |fan_id|
-        @device.write([ 0xA1, fan_id, 0x03, 0, 0, speed ])
-      end
+      @listener_factory.call.tap(&:start)
+    rescue Ambx::Error::Base
+      nil
     end
 
     def print_menu(connected)
-      status = connected ? "✓ Connected" : "⚠️ Disconnected"
+      status = connected ? STRINGS[:connected] : STRINGS[:disconnected]
 
-      @output.puts "Ambx Lights (#{status})"
+      @output.puts "#{STRINGS[:title]} (#{status})"
       @output.puts "---"
-      @output.puts "Turn Off Lights" if connected
+      @output.puts STRINGS[:turn_off] if connected
       @output.puts "---" if connected
-
       @colors.each { |color| @output.puts color["name"] }
 
       if connected
@@ -87,7 +91,7 @@ module Menubar
       end
 
       @output.puts "---"
-      @output.puts "QUIT"
+      @output.puts STRINGS[:quit]
     end
   end
 end

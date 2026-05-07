@@ -1,20 +1,18 @@
-REQUIREMENTPATH = File.dirname(__FILE__)
+require_relative "version"
 
-# Gem version
-require "#{REQUIREMENTPATH}/version"
+require "libusb"
 
-# ruby-usb; http://www.a-k-r.org/ruby-usb/
-# a ruby wrapper around libusb, needs to be compiled from source and gem installed.
-require 'libusb'
-
-# Namespaced data definitions
-require "#{REQUIREMENTPATH}/data/protocoldefinitions"
-require "#{REQUIREMENTPATH}/data/lights"
-require "#{REQUIREMENTPATH}/data/fans"
-require "#{REQUIREMENTPATH}/data/rumbler"
-
-# Core driver
-require "#{REQUIREMENTPATH}/communication/ambx"
-
-# Value objects
-require "#{REQUIREMENTPATH}/ambx/packet"
+require_relative "ambx/error"
+require_relative "ambx/color"
+require_relative "ambx/protocol"
+require_relative "ambx/device_discovery"
+require_relative "ambx/transport"
+require_relative "ambx/packet"
+require_relative "ambx/brightness"
+require_relative "ambx/light_bank"
+require_relative "ambx/fan_bank"
+require_relative "ambx/rumble_device"
+require_relative "ambx/input/event"
+require_relative "ambx/input/rotary_decoder"
+require_relative "ambx/input/listener"
+require_relative "ambx/session"

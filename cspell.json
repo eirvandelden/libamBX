@@ -7,14 +7,17 @@
   ],
   "words": [
     "Ambx",
+    "Ambilight",
     "amBX",
     "libambx",
-    "libcombustd",
     "lefthook",
     "rubocop",
     "brakeman",
     "boblight",
-    "combustd",
+    "screencapture",
+    "getpoint",
+    "setcolor",
+    "setfan",
     "Minitest",
     "WWLEFT",
     "WWCENTER",
@@ -24,6 +27,7 @@
     "Platypus",
     "oceanius",
     "replug",
+    "LIBPATH",
     "LIBUSB",
     "ENXIO"
   ]

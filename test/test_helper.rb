@@ -1,3 +1,4 @@
+# cspell:words LIBPATH libambx
 require "minitest/autorun"
 require "minitest/spec"
 
@@ -5,15 +6,13 @@ begin
   require "minitest/reporters"
   Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 rescue LoadError
-  # minitest-reporters not available; plain output
+  nil
 end
 
-# ---------------------------------------------------------------------------
-# LIBUSB stub — lets every test file run without a physical amBX device or
-# the native libusb extension being loaded.  Individual test files that need
-# finer-grained handle behaviour can define their own FakeHandle subclass.
-# ---------------------------------------------------------------------------
 module LIBUSB
+  class ERROR_TIMEOUT < StandardError; end
+  class ERROR_NO_DEVICE < StandardError; end
+
   class Context
     def initialize; end
 
@@ -21,54 +20,57 @@ module LIBUSB
       []
     end
   end
-
-  class DeviceHandle
-    def interrupt_transfer(**_opts); end
-    def claim_interface(_n); end
-    def auto_detach_kernel_driver=(_val); end
-    def close; end
-  end
 end
 
-# ---------------------------------------------------------------------------
-# Require library files directly (bypasses libambx.rb which loads the real
-# libusb gem) so pure-unit tests have no hardware dependency at all.
-# ---------------------------------------------------------------------------
 LIBPATH = File.expand_path("../libambx", __dir__)
 
-require "#{LIBPATH}/data/protocoldefinitions"
-require "#{LIBPATH}/data/lights"
-require "#{LIBPATH}/data/fans"
-require "#{LIBPATH}/data/rumbler"
+require "#{LIBPATH}/version"
+require "#{LIBPATH}/ambx/error"
+require "#{LIBPATH}/ambx/color"
+require "#{LIBPATH}/ambx/protocol"
+require "#{LIBPATH}/ambx/device_discovery"
+require "#{LIBPATH}/ambx/transport"
 require "#{LIBPATH}/ambx/packet"
-require "#{LIBPATH}/communication/ambx"
+require "#{LIBPATH}/ambx/brightness"
+require "#{LIBPATH}/ambx/light_bank"
+require "#{LIBPATH}/ambx/fan_bank"
+require "#{LIBPATH}/ambx/rumble_device"
+require "#{LIBPATH}/ambx/input/event"
+require "#{LIBPATH}/ambx/input/rotary_decoder"
+require "#{LIBPATH}/ambx/input/listener"
+require "#{LIBPATH}/ambx/session"
 
-# ---------------------------------------------------------------------------
-# Shared helper — resets all Ambx class-level state between tests so no test
-# can leak connection state into another.
-# ---------------------------------------------------------------------------
 module AmbxTestHelpers
-  # Resets all Ambx class-level state so no test leaks USB context into another.
-  def reset_ambx!
-    Ambx.instance_variable_set(:@context, nil)
-    Ambx.instance_variable_set(:@device,  nil)
-    Ambx.instance_variable_set(:@devices, [])
-    Ambx.instance_variable_set(:@handles, nil)
+  def fake_handle(transfer: nil, close_error: nil, claim_value: 0)
+    handle = Object.new
+    handle.define_singleton_method(:transfers) { @transfers ||= [] }
+    handle.define_singleton_method(:close_count) { @close_count ||= 0 }
+    handle.define_singleton_method(:auto_detach_values) { @auto_detach_values ||= [] }
+    handle.define_singleton_method(:interrupt_transfer) do |**options|
+      transfers << options
+      transfer.respond_to?(:call) ? transfer.call(options) : transfer
+    end
+    handle.define_singleton_method(:claim_interface) { |_interface| claim_value }
+    handle.define_singleton_method(:auto_detach_kernel_driver=) { |value| auto_detach_values << value }
+    handle.define_singleton_method(:close) do
+      raise close_error if close_error
+
+      @close_count = close_count + 1
+    end
+    handle
   end
 
-  # Temporarily replaces a singleton method with a stub value or callable.
-  # Restores the original even if the block raises.
-  #
-  # @example stub a return value
-  #   with_stub(Ambx, :connect, false) { Ambx.reconnect! }
-  # @example stub with a lambda (for call counting)
-  #   with_stub(Ambx, :connect, -> { calls += 1; false }) { Ambx.reconnect! }
-  def with_stub(object, method_name, value_or_callable, &block)
-    original = object.singleton_method(method_name)
-    callable = value_or_callable.respond_to?(:call) ? value_or_callable : ->(*) { value_or_callable }
-    object.define_singleton_method(method_name, callable)
-    block.call
-  ensure
-    object.define_singleton_method(method_name, original)
+  def fake_device(vendor: Ambx::Protocol::USB_VENDOR_ID, product: Ambx::Protocol::USB_PRODUCT_ID, handle:)
+    device = Object.new
+    device.define_singleton_method(:idVendor) { vendor }
+    device.define_singleton_method(:idProduct) { product }
+    device.define_singleton_method(:open) { handle }
+    device
+  end
+
+  def fake_discovery(devices)
+    Object.new.tap do |discovery|
+      discovery.define_singleton_method(:devices) { devices }
+    end
   end
 end

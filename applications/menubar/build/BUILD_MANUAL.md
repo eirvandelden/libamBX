@@ -1,3 +1,4 @@
+<!-- cspell:words libambx -->
 # Building Ambx Lights App with Platypus GUI
 
 If you don't want to use the command-line tool, you can build the app using the Platypus GUI.
@@ -41,17 +42,22 @@ If you don't want to use the command-line tool, you can build the app using the 
    - Click the "+" button to add files
    - Add the following three items:
 
-     **File 1**: libcombustd library
+     **File 1**: libambx library
      ```
-     libcombustd
-     ```
-
-     **File 2**: Menubar helpers
-     ```
-     applications/menubar/menubar_helpers.rb
+     libambx
      ```
 
-     **File 3**: Colors configuration
+     **File 2**: Menubar boot support
+     ```
+     applications/menubar/boot.rb
+     ```
+
+     **File 3**: Menubar app
+     ```
+     applications/menubar/app.rb
+     ```
+
+     **File 4**: Colors configuration
      ```
      applications/menubar/config/colors.yml
      ```
