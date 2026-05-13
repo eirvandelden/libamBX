@@ -2,7 +2,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 VENDOR_DIR="$SCRIPT_DIR/vendor/bundle"
 
 cd "$SCRIPT_DIR"
@@ -55,9 +55,13 @@ rm -rf "$VENDOR_DIR"
   --name "Ambx Lights" \
   --interface-type "Status Menu" \
   --interpreter "$RUBY_INTERPRETER" \
-  --bundled-file "../../libambx" \
+  --bundled-file "../../../libambx" \
   --bundled-file "./vendor/bundle" \
   --bundled-file "../config/colors.yml" \
+  --bundled-file "../app.rb" \
+  --bundled-file "../boot.rb" \
+  --bundled-file "../brightness_actions.rb" \
+  --bundled-file "../macos_volume.rb" \
   --status-item-icon "icon.png" \
   --quit-after-execution false \
   "../menubar.rb" \

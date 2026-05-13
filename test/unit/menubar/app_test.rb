@@ -15,8 +15,8 @@ class MenubarLightSpy
     @calls << [ :off ]
   end
 
-  def set_all(color)
-    @calls << [ :set_all, color.to_a ]
+  def set_all(color, green_boost: 1.0)
+    @calls << [ :set_all, color.to_a, green_boost ]
   end
 end
 
@@ -46,11 +46,12 @@ class MenubarSessionSpy
   end
 end
 
-def build_menubar_app(session)
+def build_menubar_app(session, green_boost: 1.0)
   Menubar::App.new(
     session_factory: -> { session },
     colors: MENUBAR_TEST_COLORS,
-    fan_speeds: MENUBAR_TEST_FAN_SPEEDS
+    fan_speeds: MENUBAR_TEST_FAN_SPEEDS,
+    green_boost: green_boost
   )
 end
 
@@ -83,7 +84,16 @@ describe Menubar::App, "#handle_selection" do
     connected = app.handle_selection("Warm White", connected: false)
 
     _(connected).must_equal true
-    _(session.lights.calls).must_equal [ [ :set_all, [ 255, 200, 150 ] ] ]
+    _(session.lights.calls).must_equal [ [ :set_all, [ 255, 200, 150 ], 1.0 ] ]
+  end
+
+  it "passes the configured green boost to the light bank on color selection" do
+    session = MenubarSessionSpy.new
+    app = build_menubar_app(session, green_boost: 2.2)
+
+    app.handle_selection("Warm White", connected: false)
+
+    _(session.lights.calls).must_equal [ [ :set_all, [ 255, 200, 150 ], 2.2 ] ]
   end
 
   it "sends a fan selection through the session fan bank" do

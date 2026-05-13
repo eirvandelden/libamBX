@@ -8,10 +8,11 @@ module Menubar
   }.freeze
 
   class App
-    def initialize(session_factory:, colors:, fan_speeds:, input: $stdin, output: $stdout, listener_factory: nil)
+    def initialize(session_factory:, colors:, fan_speeds:, green_boost: 1.0, input: $stdin, output: $stdout, listener_factory: nil)
       @session_factory = session_factory
       @colors = colors
       @fan_speeds = fan_speeds
+      @green_boost = green_boost
       @input = input
       @output = output
       @listener_factory = listener_factory
@@ -45,7 +46,7 @@ module Menubar
       return perform { |session| session.fans.set_all(fan["speed"]) } if fan
 
       color = @colors.find { |entry| entry["name"] == selection }
-      return perform { |session| session.lights.set_all(Ambx::Color.rgb(*color["rgb"])) } if color
+      return perform { |session| session.lights.set_all(Ambx::Color.rgb(*color["rgb"]), green_boost: @green_boost) } if color
 
       connected
     end
