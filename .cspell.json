@@ -19,7 +19,8 @@
     "autorun",
     "minitest",
     "osascript",
-    "protocoldefinitions"
+    "protocoldefinitions",
+    "libambx"
   ],
   "ignorePaths": [
     "node_modules",

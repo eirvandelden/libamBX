@@ -13,5 +13,6 @@ config = YAML.safe_load_file(Menubar::Boot.config_path(__dir__))
 Menubar::App.new(
   session_factory: -> { Ambx::Session.open },
   colors: config.fetch("colors"),
-  fan_speeds: config.fetch("fan_speeds")
+  fan_speeds: config.fetch("fan_speeds"),
+  green_boost: config.fetch("green_boost", 1.0)
 ).run
