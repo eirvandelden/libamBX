@@ -40,7 +40,7 @@ If you don't want to use the command-line tool, you can build the app using the 
 
    - Click the "Files" tab
    - Click the "+" button to add files
-   - Add the following three items:
+   - Add the following items:
 
      **File 1**: libambx library
      ```
@@ -57,7 +57,17 @@ If you don't want to use the command-line tool, you can build the app using the 
      applications/menubar/app.rb
      ```
 
-     **File 4**: Colors configuration
+     **File 4**: Brightness action support
+     ```
+     applications/menubar/brightness_actions.rb
+     ```
+
+     **File 5**: macOS volume support
+     ```
+     applications/menubar/macos_volume.rb
+     ```
+
+     **File 6**: Colors configuration
      ```
      applications/menubar/config/colors.yml
      ```

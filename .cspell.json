@@ -20,7 +20,11 @@
     "minitest",
     "osascript",
     "protocoldefinitions",
-    "libambx"
+    "libambx",
+    "ambilight",
+    "boblight",
+    "setcolor",
+    "setfan"
   ],
   "ignorePaths": [
     "node_modules",
