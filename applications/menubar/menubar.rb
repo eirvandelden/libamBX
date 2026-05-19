@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+$stdout.sync = true
+$stderr.sync = true
+
 require "yaml"
 require_relative "app"
 require_relative "boot"

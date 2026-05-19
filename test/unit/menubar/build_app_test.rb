@@ -30,6 +30,21 @@ describe "applications/menubar/build/build-app.sh" do
     end
   end
 
+  it "keeps stdout and stderr unbuffered for Platypus status menu updates" do
+    script = File.read(File.expand_path("../../../applications/menubar/menubar.rb", __dir__))
+
+    _(script).must_include "$stdout.sync = true"
+    _(script).must_include "$stderr.sync = true"
+  end
+
+  it "documents every support file required by the manual Platypus build" do
+    manual = File.read(File.expand_path("../../../applications/menubar/build/BUILD_MANUAL.md", __dir__))
+
+    %w[app.rb boot.rb brightness_actions.rb macos_volume.rb].each do |file|
+      _(manual).must_include "applications/menubar/#{file}"
+    end
+  end
+
   it "has executable permissions" do
     _(File.stat(build_script).mode & 0o111).wont_equal 0
   end

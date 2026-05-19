@@ -39,13 +39,24 @@ running = true
 Signal.trap("INT") { running = false }
 Signal.trap("TERM") { running = false }
 
-session = Ambx::Session.open
-mapper = Ambilight::ZoneMapper.new(lights: session.lights)
+session = nil
 
-while running
-  image = capture_screenshot
-  mapper.apply(calculate_zone_colors(image))
-  sleep(0.5)
+begin
+  session = Ambx::Session.open
+  mapper = Ambilight::ZoneMapper.new(lights: session.lights)
+
+  while running
+    image = capture_screenshot
+    mapper.apply(calculate_zone_colors(image))
+    sleep(0.5)
+  end
+
+rescue Ambx::Error::NoDeviceFound
+  warn "Unable to find an ambx device"
+  exit 1
+rescue Ambx::Error::OpenFailed, Ambx::Error::ClaimFailed
+  warn "Unable to open the discovered device"
+  exit 1
+ensure
+  session&.close
 end
-
-session.close
