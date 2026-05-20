@@ -46,8 +46,15 @@ begin
   mapper = Ambilight::ZoneMapper.new(lights: session.lights)
 
   while running
-    image = capture_screenshot
-    mapper.apply(calculate_zone_colors(image))
+    begin
+      image = capture_screenshot
+      mapper.apply(calculate_zone_colors(image))
+    rescue Ambx::Error::Base
+      raise
+    rescue StandardError => e
+      warn "Error: #{e.message}"
+    end
+
     sleep(0.5)
   end
 

@@ -12,7 +12,8 @@ describe "applications/menubar/build/build-app.sh" do
   end
 
   it "vendors a standalone bundle into the app" do
-    _(source).must_include "bundle install --standalone --path applications/menubar/build/vendor/bundle"
+    _(source).must_include "BUNDLE_PATH=applications/menubar/build/vendor/bundle bundle install --standalone"
+    _(source).wont_include "bundle install --standalone --path"
     _(source).must_include '--bundled-file "./vendor/bundle"'
   end
 
