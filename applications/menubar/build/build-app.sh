@@ -48,7 +48,7 @@ RUBY_INTERPRETER="$(which ruby)"
 echo "Using Ruby interpreter: $RUBY_INTERPRETER"
 
 rm -rf "$VENDOR_DIR"
-(cd "$REPO_ROOT" && bundle install --standalone --path applications/menubar/build/vendor/bundle)
+(cd "$REPO_ROOT" && BUNDLE_PATH=applications/menubar/build/vendor/bundle bundle install --standalone)
 
 "$PLATYPUS_CLI" \
   -y \
