@@ -1,18 +1,18 @@
 #!/bin/bash
 set -e
 
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+VENDOR_DIR="$SCRIPT_DIR/vendor/bundle"
 
-# Find Platypus CLI tool
+cd "$SCRIPT_DIR"
+
 PLATYPUS_CLI=""
 
-# Check for Homebrew Cask installation (most common on Apple Silicon)
 if [ -f "/opt/homebrew/Caskroom/platypus/5.5.0/Platypus.app/Contents/Resources/platypus_clt" ]; then
     PLATYPUS_CLI="/opt/homebrew/Caskroom/platypus/5.5.0/Platypus.app/Contents/Resources/platypus_clt"
-# Check for Homebrew Cask installation (Intel Macs)
 elif [ -f "/usr/local/Caskroom/platypus/5.5.0/Platypus.app/Contents/Resources/platypus_clt" ]; then
     PLATYPUS_CLI="/usr/local/Caskroom/platypus/5.5.0/Platypus.app/Contents/Resources/platypus_clt"
-# Check if installed system-wide
 elif command -v platypus &> /dev/null; then
     PLATYPUS_CLI="platypus"
 else
@@ -26,13 +26,12 @@ fi
 
 echo "Using Platypus CLI: $PLATYPUS_CLI"
 
-# Allow test overrides for the CLI path and resources check path
 if [ -n "$PLATYPUS_CLI_OVERRIDE" ]; then
     PLATYPUS_CLI="$PLATYPUS_CLI_OVERRIDE"
 fi
+
 PLATYPUS_RESOURCES_CHECK="${PLATYPUS_RESOURCES_CHECK:-/usr/local/share/platypus/ScriptExec}"
 
-# Check if Platypus CLI resources are installed system-wide
 if [ ! -f "$PLATYPUS_RESOURCES_CHECK" ] && [[ "$PLATYPUS_CLI" == *"Caskroom"* ]]; then
     RESOURCES_DIR="$(dirname "$PLATYPUS_CLI")"
     INSTALL_SCRIPT="$RESOURCES_DIR/InstallCommandLineTool.sh"
@@ -45,20 +44,26 @@ if [ ! -f "$PLATYPUS_RESOURCES_CHECK" ] && [[ "$PLATYPUS_CLI" == *"Caskroom"* ]]
     exit 1
 fi
 
-# Detect Ruby interpreter (use current ruby with gem dependencies)
 RUBY_INTERPRETER="$(which ruby)"
 echo "Using Ruby interpreter: $RUBY_INTERPRETER"
 
-# Build the Ambx Lights app
+rm -rf "$VENDOR_DIR"
+(cd "$REPO_ROOT" && BUNDLE_PATH=applications/menubar/build/vendor/bundle bundle install --standalone)
+
 "$PLATYPUS_CLI" \
   -y \
   --name "Ambx Lights" \
   --interface-type "Status Menu" \
   --interpreter "$RUBY_INTERPRETER" \
-  --bundled-file "../../../libcombustd" \
-  --bundled-file "../menubar_helpers.rb" \
+  --bundled-file "../../../libambx" \
+  --bundled-file "./vendor/bundle" \
   --bundled-file "../config/colors.yml" \
+  --bundled-file "../app.rb" \
+  --bundled-file "../boot.rb" \
+  --bundled-file "../brightness_actions.rb" \
+  --bundled-file "../macos_volume.rb" \
   --status-item-icon "icon.png" \
+  --quit-after-execution false \
   "../menubar.rb" \
   "./Ambx Lights.app"
 

@@ -1,26 +1,33 @@
-REQUIREMENTS = File.dirname(__FILE__)
+# cspell:words libambx boblight oceanius
+require_relative "../../libambx/libambx"
 
-require REQUIREMENTS + "/../../libcombustd/libcombustd"
-
-puts "\nboblight - a small tool to listen to the output of boblight popen to control a set of Philips Ambx lights.\n"
+puts
+puts "boblight - a small tool to listen to the output of boblight popen to control a set of Philips Ambx lights."
 puts "See README and docs/ for faq, usage and support.\n\n"
 puts "Looking for support ?\nChat: irc.oceanius.com #dev\nMail: combustd@sexybiggetje.nl\n\n"
 puts "Format: ruby boblight.rb r1 g1 b1 r2 g2 b2 r3 g3 b3 r4 g4 b4 r5 g5 b5\n\n"
 
-if Ambx.connect
-  if Ambx.open
-    while true
-      r1, g1, b1, r2, g2, b2, r3, g3, b3, r4, g4, b4, r5, g5, b5 = gets.split(" ", 15)
-      Ambx.write([ 0xA1, Lights::LEFT, 0x03, Float(r1) * 255, Float(g1) * 255, Float(b1) * 255 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, 0x03, Float(r2) * 255, Float(g2) * 255, Float(b2) * 255 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, 0x03, Float(r3) * 255, Float(g3) * 255, Float(b3) * 255 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, 0x03, Float(r4) * 255, Float(g4) * 255, Float(b4) * 255 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, 0x03, Float(r5) * 255, Float(g5) * 255, Float(b5) * 255 ])
-    end
-    Ambx.close
-  else
-    puts "Unable to open the discovered device"
+session = nil
+
+begin
+  session = Ambx::Session.open
+
+  while (line = gets)
+    values = line.split(" ", 15).map { |value| (Float(value) * 255).round }
+    colors = values.each_slice(3).map { |rgb| Ambx::Color.rgb(*rgb) }
+
+    session.lights.set(:left, colors[0])
+    session.lights.set(:right, colors[1])
+    session.lights.set(:wwleft, colors[2])
+    session.lights.set(:wwright, colors[3])
+    session.lights.set(:wwcenter, colors[4])
   end
-else
-  puts "Unable to find a ambx device"
+rescue Ambx::Error::NoDeviceFound
+  warn "Unable to find an ambx device"
+  exit 1
+rescue Ambx::Error::OpenFailed, Ambx::Error::ClaimFailed
+  warn "Unable to open the discovered device"
+  exit 1
+ensure
+  session&.close
 end

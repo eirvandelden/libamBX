@@ -17,7 +17,14 @@
     "WWRIGHT",
     "ENXIO",
     "autorun",
-    "minitest"
+    "minitest",
+    "osascript",
+    "protocoldefinitions",
+    "libambx",
+    "ambilight",
+    "boblight",
+    "setcolor",
+    "setfan"
   ],
   "ignorePaths": [
     "node_modules",

@@ -2,3 +2,7 @@ inherit_from:
   - .rubocop_todo.yml
   - ~/.rubocop.yml
 
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*_spec.rb
+    - test/**/*_test.rb

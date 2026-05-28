@@ -1,0 +1,34 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules/**",
+    "vendor/**"
+  ],
+  "words": [
+    "Ambx",
+    "Ambilight",
+    "amBX",
+    "libambx",
+    "lefthook",
+    "rubocop",
+    "brakeman",
+    "boblight",
+    "screencapture",
+    "getpoint",
+    "setcolor",
+    "setfan",
+    "Minitest",
+    "WWLEFT",
+    "WWCENTER",
+    "WWRIGHT",
+    "Madcatz",
+    "Cyborg",
+    "Platypus",
+    "oceanius",
+    "replug",
+    "LIBPATH",
+    "LIBUSB",
+    "ENXIO"
+  ]
+}

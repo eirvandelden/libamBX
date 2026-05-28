@@ -1,105 +1,42 @@
-# test-loop
-# loops a green light from left to right, and then a blue one from right to left
+# cspell:words libambx
+require "../../libambx/libambx"
 
-# put in our requirements.
-require "../../libcombustd/libcombustd"
+ZONE_SEQUENCE = %i[left wwleft wwcenter wwright right].freeze
+BASE_COLOR = Ambx::Color.rgb(204, 0, 0)
+GREEN = Ambx::Color.rgb(0, 255, 0)
+BLUE = Ambx::Color.rgb(0, 0, 255)
+
+def write_frame(session, active_zone:, active_color:)
+  ZONE_SEQUENCE.each do |zone|
+    color = zone == active_zone ? active_color : BASE_COLOR
+    session.lights.set(zone, color)
+  end
+end
+
+session = Ambx::Session.open
 
 puts "\nRunning test-loop\n"
 
-# Some dummy code to test the Ambx interface
-# try to connect and open the device and then loop trough some colors.
-
-if Ambx.connect
-  if Ambx.open
-    while true
-      # First half of loop, GREEN from left to right
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0xFF, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0xFF, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0xFF, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0xFF, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0xFF, 0x00 ])
-      sleep 1
-      # All red
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      # Second half of loop BLUE from right to left
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0xFF ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0xFF ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0xFF ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0xFF ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0xFF ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      # All red
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0xCC, 0x00, 0x00 ])
-      sleep 1
-      # Turn off all lights
-      Ambx.write([ 0xA1, Lights::LEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWLEFT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::WWRIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0x00 ])
-      Ambx.write([ 0xA1, Lights::RIGHT, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0x00, 0x00 ])
+begin
+  loop do
+    ZONE_SEQUENCE.each do |zone|
+      write_frame(session, active_zone: zone, active_color: GREEN)
       sleep 1
     end
-    Ambx.close true
-  else
-    puts "Unable to open the discovered device"
+
+    session.lights.set_all(BASE_COLOR)
+    sleep 1
+
+    ZONE_SEQUENCE.reverse_each do |zone|
+      write_frame(session, active_zone: zone, active_color: BLUE)
+      sleep 1
+    end
+
+    session.lights.set_all(BASE_COLOR)
+    sleep 1
+    session.lights.off
+    sleep 1
   end
-else
-  puts "Unable to find a ambx device"
+ensure
+  session&.close
 end
