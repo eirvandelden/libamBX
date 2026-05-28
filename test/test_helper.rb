@@ -10,8 +10,10 @@ rescue LoadError
 end
 
 module LIBUSB
-  class ERROR_TIMEOUT < StandardError; end
-  class ERROR_NO_DEVICE < StandardError; end
+  class Error < StandardError; end
+  class ERROR_ACCESS < Error; end
+  class ERROR_TIMEOUT < Error; end
+  class ERROR_NO_DEVICE < Error; end
 
   class Context
     def initialize; end
@@ -60,11 +62,15 @@ module AmbxTestHelpers
     handle
   end
 
-  def fake_device(vendor: Ambx::Protocol::USB_VENDOR_ID, product: Ambx::Protocol::USB_PRODUCT_ID, handle:)
+  def fake_device(vendor: Ambx::Protocol::USB_VENDOR_ID, product: Ambx::Protocol::USB_PRODUCT_ID, handle: nil, open_error: nil)
     device = Object.new
     device.define_singleton_method(:idVendor) { vendor }
     device.define_singleton_method(:idProduct) { product }
-    device.define_singleton_method(:open) { handle }
+    device.define_singleton_method(:open) do
+      raise open_error if open_error
+
+      handle
+    end
     device
   end
 

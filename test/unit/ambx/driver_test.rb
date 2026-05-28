@@ -18,8 +18,23 @@ describe Ambx::Transport, "#open!" do
     _ { transport.open! }.must_raise Ambx::Error::NoDeviceFound
   end
 
+  it "raises open failed when libusb cannot open a discovered device" do
+    device = fake_device(open_error: LIBUSB::ERROR_ACCESS)
+    transport = Ambx::Transport.new(discovery: fake_discovery([ device ]))
+
+    _ { transport.open! }.must_raise Ambx::Error::OpenFailed
+  end
+
   it "raises when interface claiming fails" do
     handle = fake_handle(claim_value: nil)
+    transport = Ambx::Transport.new(discovery: fake_discovery([ fake_device(handle: handle) ]))
+
+    _ { transport.open! }.must_raise Ambx::Error::ClaimFailed
+  end
+
+  it "raises claim failed when libusb cannot claim an opened device" do
+    handle = fake_handle(transfer: ->(_options) { nil })
+    handle.define_singleton_method(:claim_interface) { |_interface| raise LIBUSB::ERROR_ACCESS }
     transport = Ambx::Transport.new(discovery: fake_discovery([ fake_device(handle: handle) ]))
 
     _ { transport.open! }.must_raise Ambx::Error::ClaimFailed

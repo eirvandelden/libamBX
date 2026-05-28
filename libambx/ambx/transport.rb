@@ -17,7 +17,8 @@ class Ambx
       devices = @discovery.devices
       raise Error::NoDeviceFound if devices.empty?
 
-      @handles = devices.map(&:open)
+      @handles = []
+      devices.each { |device| @handles << open_device(device) }
       raise_open_failed if @handles.any?(&:nil?)
 
       claim_interfaces!
@@ -61,6 +62,12 @@ class Ambx
       raise Error::OpenFailed
     end
 
+    def open_device(device)
+      device.open
+    rescue LIBUSB::Error
+      raise Error::OpenFailed
+    end
+
     def claim_interfaces!
       @handles.each do |handle|
         claim_interface(handle)
@@ -80,7 +87,7 @@ class Ambx
 
     def claim_once(handle)
       handle.claim_interface(0)
-    rescue ArgumentError
+    rescue ArgumentError, LIBUSB::Error
       nil
     end
 
