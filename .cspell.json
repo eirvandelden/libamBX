@@ -17,7 +17,9 @@
     "WWRIGHT",
     "ENXIO",
     "autorun",
-    "minitest"
+    "minitest",
+    "setcolor",
+    "setfan"
   ],
   "ignorePaths": [
     "node_modules",

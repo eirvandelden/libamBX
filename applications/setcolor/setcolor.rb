@@ -1,8 +1,7 @@
 require_relative "../../libcombustd/libcombustd"
 
-puts "\nsetcolor - a small utility to configure a set of Philips Ambx lights to a specific color.\n"
-puts "See README and docs/ for faq, usage and support.\n\n"
-puts "Looking for support ?\nChat: irc.oceanius.com #dev\nMail: combustd@sexybiggetje.nl\n\n"
+puts "\n🌈 setcolor — splash some color onto your Philips amBX lights.\n"
+puts "Enjoy the glow! ✨\n\n"
 
 if Ambx.connect
   if Ambx.open
