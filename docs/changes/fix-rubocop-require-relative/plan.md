@@ -19,8 +19,9 @@ Run every linter check from a fresh clone of the branch outside this repository:
 
 - `.rubocop.yml`: add a `Packaging/RequireRelativeHardcodingLib` block with an `Exclude` list for the three paths, plus a comment before each explaining why.
 - `docs/changes/fix-rubocop-require-relative/{intent,spec,plan}.md`: the change artifacts.
+- `.cspell.json`: adds the words the change artifacts use (`ambilight`, `Delden`, `Haije`, `Rakefile`, `unshift`, `worktree`, `worktrees`), because the spelling hook rejects the commit without them. They stay after `finish` removes the artifacts: `Delden` and `Haije` appear in every future intent's author line, and the others come back whenever a change describes these files or this workflow.
 
-Nothing else changes. `.rubocop.yml` isn't in `spec.files`, so the gem's contents can't change.
+Nothing else changes. Neither `.rubocop.yml` nor `.cspell.json` is in `spec.files`, so the gem's contents can't change.
 
 ## Order of work
 
