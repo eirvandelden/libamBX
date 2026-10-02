@@ -33,7 +33,14 @@
     "screencapture",
     "setcolor",
     "setfan",
-    "testtask"
+    "testtask",
+    "ambilight",
+    "Delden",
+    "Haije",
+    "Rakefile",
+    "unshift",
+    "worktree",
+    "worktrees"
   ],
   "ignorePaths": [
     "node_modules",

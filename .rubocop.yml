@@ -2,3 +2,11 @@
 # The rules shared by every personal Ruby project
 inherit_gem:
   rubocop-eirvandelden: config/default.yml
+
+Packaging/RequireRelativeHardcodingLib:
+  Exclude:
+    # Demo scripts run from a checkout and are not part of the gem.
+    - "applications/**/*"
+    - "examples/**/*"
+    # False positive: the rule compares paths by prefix, so it reads libcombustd/ as lib/.
+    - "spec/ambx_spec.rb"
