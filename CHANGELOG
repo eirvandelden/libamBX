@@ -1,3 +1,12 @@
+# Version 0.5.0
+
+- Require Ruby 4.0 or newer. Callers on Ruby 3.4 can no longer install this
+  release and should stay on 0.4.1.
+- Move the libusb gem to 0.8.0, which bundles libusb 1.0.30. The driver calls
+  nothing that changed.
+- Update every other dependency to its latest release and lock with
+  Bundler 4.0.22.
+
 # Version 0.4.1
 
 - Scanning for controllers no longer leaks a connection to the USB subsystem.
