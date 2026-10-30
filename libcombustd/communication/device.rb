@@ -2,11 +2,13 @@ class Ambx
   class Device
     CLEAR_LIGHTS = [ Lights::LEFT, Lights::WWLEFT, Lights::WWCENTER, Lights::WWRIGHT, Lights::RIGHT ].freeze
 
+    #: (LIBUSB::Device) -> void
     def initialize(descriptor)
       @descriptor = descriptor
       @handle = nil
     end
 
+    #: () -> String?
     def identity
       return "serial:#{serial_number}" unless serial_number.to_s.empty?
       return "port:#{formatted_port_path}" unless formatted_port_path.empty?
@@ -14,6 +16,7 @@ class Ambx
       nil
     end
 
+    #: () -> String?
     def serial_number
       return @serial_number if defined?(@serial_number)
 
@@ -24,6 +27,7 @@ class Ambx
       @serial_number = nil
     end
 
+    #: () -> (Array[Integer] | String)?
     def port_path
       return @port_path if defined?(@port_path)
 
@@ -34,6 +38,7 @@ class Ambx
       @port_path = nil
     end
 
+    #: () -> (self | false)
     def open
       return self if connected?
 
@@ -46,10 +51,12 @@ class Ambx
       raise
     end
 
+    #: () -> bool
     def connected?
       !@handle.nil?
     end
 
+    #: (Array[Integer]) -> bool
     def write(bytes)
       return false unless connected?
 
@@ -59,6 +66,7 @@ class Ambx
       false
     end
 
+    #: (?clear_lights: bool) -> void
     def close(clear_lights: false)
       handle = @handle
       return unless handle

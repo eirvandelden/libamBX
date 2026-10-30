@@ -16,6 +16,7 @@ class Ambx
   @legacy_devices = []
 
   # Find the device by finding it in the device tree, fail if it's not connected
+  #: () -> Array[Ambx::Device]
   def self.devices
     usb_connection.devices.filter_map do |dev|
       Device.new(dev) if dev.idVendor == ProtocolDefinitions::USB_VENDOR_ID && dev.idProduct == ProtocolDefinitions::USB_PRODUCT_ID
@@ -23,6 +24,7 @@ class Ambx
   end
 
   # Find the device by finding it in the device tree, fail if it's not connected
+  #: () -> bool
   def self.connect
     @legacy_devices = devices
     !@legacy_devices.empty?
@@ -30,6 +32,7 @@ class Ambx
 
   # Open the device if it has been connected before.
   # If the device hasn't been opened yet, try to open it otherwise fail
+  #: () -> bool
   def self.open
     return true if Ambx.connected?
     return false if @legacy_devices.empty? && !Ambx.connect
@@ -47,6 +50,7 @@ class Ambx
   end
 
   # Try to claim interface
+  #: (LIBUSB::DevHandle, ?retry_busy: bool) -> bool
   def self.claim_interface(handle, retry_busy: false)
     attempts = 0
 
@@ -58,12 +62,14 @@ class Ambx
 
   # Check if device handles are currently open and valid
   # @return [Boolean] true if connected with valid handles, false otherwise
+  #: () -> bool
   def self.connected?
     @legacy_devices.any?(&:connected?)
   end
 
   # Close the device if it is open.
   # set clearLights to true to try and set the lights back to 0x00
+  #: (?bool) -> void
   def self.close (clearLights = false)
     legacy_devices = @legacy_devices
     @legacy_devices = []
@@ -77,6 +83,7 @@ class Ambx
   # @return [Boolean] true when every device accepted the transfer
   # @example Set WW center light to green
   #   Ambx.write_all([0x01, Lights::WWCENTER, ProtocolDefinitions::SET_LIGHT_COLOR, 0x00, 0xFF, 0x00])
+  #: (Array[Integer]) -> bool
   def self.write_all(bytes)
     return false if @legacy_devices.empty?
 
@@ -90,6 +97,7 @@ class Ambx
     true
   end
 
+  #: (Array[Integer]) -> bool
   def self.write(bytes)
     unless @write_deprecation_warned
       warn "Ambx.write is deprecated; use Ambx.write_all instead."
@@ -99,6 +107,7 @@ class Ambx
     write_all(bytes)
   end
 
+  #: (LIBUSB::DevHandle, retry_busy: bool) -> LIBUSB::DevHandle?
   def self.claim_interface_result(handle, retry_busy:)
     handle.claim_interface(0)
   rescue ArgumentError
@@ -109,6 +118,7 @@ class Ambx
     nil
   end
 
+  #: (LIBUSB::DevHandle, Integer) -> bool
   def self.retry_claim_interface?(handle, attempts)
     return false if attempts > CLAIM_INTERFACE_RETRIES
 
@@ -118,6 +128,7 @@ class Ambx
 
   # The connection to the USB subsystem outlives every scan, so the devices handed
   # out by a scan stay usable for as long as the caller keeps them.
+  #: () -> LIBUSB::Context
   def self.usb_connection
     @usb_connection ||= LIBUSB::Context.new
   end
