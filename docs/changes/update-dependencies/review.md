@@ -87,3 +87,32 @@ No findings.
 | `Libambx::VERSION` is "0.5.0"; the CHANGELOG says Ruby 4.0 is required | `test_canonical_entry_point_loads_the_driver_and_version` asserts "0.5.0"; CHANGELOG 0.5.0 entry | Met |
 
 Both round 2 findings are closed: the lockfile and the CHANGELOG now name Bundler 4.0.23, and the private-method signatures stay by Etienne's decision. Both tests named in the plan's `## Proof` exist in `spec/gem_package_spec.rb`. No test was weakened, skipped or deleted. Every commit holds one logical change. The three missing criteria need the push, the pull request and the hardware run; none of them is a code defect.
+
+## Round 4 — 2026-11-06T13:23Z — 6ad79e5
+
+The repository has no `REVIEW.md` or `REVIEW.local.md`. This round uses the default Bugs, Security, Compliance and Design passes. It covers the two commits since 2e2d1e0 (cd6eb3b, 6ad79e5) and re-checks the full diff against `origin/main`.
+
+Checks run on 6ad79e5 in a fresh clone, on Ruby 4.0.9: `bi` installs and leaves `Gemfile.lock` unchanged. `bundle exec rake test` green (23 + 3 runs). RuboCop: 19 files, no offenses. Brakeman `--force-scan`: no warnings. `bundle-audit check --update`: no vulnerabilities. `yamllint .github/workflows/*.yml`: clean. `bundle outdated`: exit 1, only prism 1.9.0 → 2.1.0, held back as the CHANGELOG says. `gem search` on gem.coop: the latest Bundler is 4.0.24, which the lockfile and the CHANGELOG now name. `rubocop-eirvandelden` is locked at 32d259f, which equals `git ls-remote` HEAD.
+
+The activesupport 8.1.4 → 8.1.4.1 bump is correct. The advisory database lists GHSA-8474-xrp6-wh69 (a denial of service in `safe_constantize`) with `>= 8.1.4.1` as the patched version for 8.1. The `CHECKSUMS` hash changes with the version. As in round 3, `CHECKSUMS` has no bundler line, because Bundler is a default gem here; frozen installs accept that.
+
+### Findings
+
+No findings.
+
+### Compliance
+
+| Acceptance criterion (intent.md) | Proof | Status |
+| --- | --- | --- |
+| `bundle outdated` reports no outdated gem, or the PR names any held-back gem | `bundle outdated`: only prism; minitest and rubocop-ast cap it at 1.x | Met, once the PR body names prism |
+| `BUNDLED WITH 4.0.22` or newer | `Gemfile.lock` tail `4.0.24` vs `gem search` on gem.coop (latest 4.0.24) | Met |
+| `rubocop-eirvandelden` at the latest default-branch commit | lockfile `revision:` = `git ls-remote` HEAD `32d259f` | Met |
+| 0.5.0 refuses Ruby 3.4 and installs on Ruby 4.0 | `test_gemspec_describes_the_libambx_package` asserts `>= 4.0`; clean-environment `gem install` from round 1 | Met |
+| Test workflow runs on Ruby 4.0 on the PR and passes, including the gem build | Pull request Test check | Missing: branch not pushed yet (`origin/update-dependencies` is at b003180), no pull request |
+| Rubocop workflow runs on the PR to `main` and passes | Pull request Rubocop check | Missing: same reason; the round 2 spike passed on RuboCop 1.92.2 |
+| Every action at its latest major; code-scanning-rubocop at its latest release | checkout v7, setup-ruby v1, setup-rv pinned to the v1 commit, codeql-action v4, code-scanning-rubocop 0.6.1 | Met |
+| Locally: tests, RuboCop, Brakeman, bundler-audit clean | Commands listed above | Met |
+| The lights respond on real hardware | Etienne's setcolor run, plan step 21 | Missing: no evidence recorded yet |
+| `Libambx::VERSION` is "0.5.0"; the CHANGELOG says Ruby 4.0 is required | `test_canonical_entry_point_loads_the_driver_and_version` asserts "0.5.0"; CHANGELOG 0.5.0 entry | Met |
+
+Both new commits hold one logical change each and touch only `Gemfile.lock` and the CHANGELOG's Bundler version. No test was weakened, skipped or deleted. The three missing criteria need the push, the pull request and the hardware run; none of them is a code defect.
