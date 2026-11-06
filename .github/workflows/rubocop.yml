@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set up rv
-        uses: spinel-coop/setup-rv@4891587af7660b624f7d662863afa594934ab3a7 # v1
+        uses: spinel-coop/setup-rv@main
         with:
           ruby-version: "4.0"
           install-gems: true
