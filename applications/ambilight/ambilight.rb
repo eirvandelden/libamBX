@@ -9,6 +9,7 @@ PIXEL_SAMPLING_RATE = 20 # Process every nth pixel for performance
 require_relative "../../lib/libambx"
 
 # Capture a screenshot and load it into memory
+#: () -> Vips::Image
 def capture_screenshot
   screenshot_path = "screenshot.png"
 
@@ -22,6 +23,7 @@ def capture_screenshot
 end
 
 # Calculate the average color of a given region in the image
+#: (Vips::Image, Integer, Integer, Integer, Integer) -> Array[Integer]
 def average_color(image, x_start, y_start, width, height)
   total_r     = 0
   total_g     = 0
@@ -49,6 +51,7 @@ def average_color(image, x_start, y_start, width, height)
 end
 
 # Divide the screen into zones and calculate the average color for each
+#: (Vips::Image) -> Array[Array[Integer]]
 def calculate_zone_colors(image)
   # Get the screen dimensions
   screen_width  = image.width
@@ -75,6 +78,7 @@ def calculate_zone_colors(image)
 end
 
 # Update lights using the AmBX repository
+#: (Array[Array[Integer]]) -> void
 def update_lights(zone_colors)
   if Ambx.open
     light_mapping = {
